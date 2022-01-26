@@ -726,6 +726,15 @@ class Catcher with ReportModeAction {
     };
   }
 
+  /// Add custom error widget which replaces red screen of death (RSOD).
+  static void addCustomErrorWidget(
+      Widget Function(FlutterErrorDetails details) builder) {
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+      print(builder.runtimeType);
+      return builder(details);
+    };
+  }
+
   ///Get platform type based on device.
   PlatformType _getPlatformType() {
     if (ApplicationProfileManager.isWeb()) {

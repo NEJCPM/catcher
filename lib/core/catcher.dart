@@ -488,19 +488,18 @@ class Catcher with ReportModeAction {
 
   /// Report checked error (error caught in try-catch block). Catcher will treat
   /// this as normal exception and pass it to handlers.
-  static void reportCheckedError(dynamic error, dynamic stackTrace) {
+  static void reportCheckedError(dynamic error, dynamic stackTrace,
+      {ReportMode? customReportMode}) {
     dynamic errorValue = error;
     dynamic stackTraceValue = stackTrace;
     errorValue ??= "undefined error";
     stackTraceValue ??= StackTrace.current;
-    _instance._reportError(error, stackTrace);
+    _instance._reportError(error, stackTrace,
+        customReportMode: customReportMode);
   }
 
-  void _reportError(
-    dynamic error,
-    dynamic stackTrace, {
-    FlutterErrorDetails? errorDetails,
-  }) async {
+  void _reportError(dynamic error, dynamic stackTrace,
+      {FlutterErrorDetails? errorDetails, ReportMode? customReportMode}) async {
     if (errorDetails?.silent == true &&
         _currentConfig.handleSilentError == false) {
       _logger.info(
@@ -552,9 +551,13 @@ class Catcher with ReportModeAction {
         _getReportModeFromExplicitExceptionReportModeMap(error);
     if (reportMode != null) {
       _logger.info("Using explicit report mode for error");
+    } else if (customReportMode != null) {
+      customReportMode.setReportModeAction(this);
+      reportMode = customReportMode;
     } else {
       reportMode = _currentConfig.reportMode;
     }
+
     if (!isReportModeSupportedInPlatform(report, reportMode)) {
       _logger.warning(
         "$reportMode in not supported for ${describeEnum(report.platformType)} platform",
